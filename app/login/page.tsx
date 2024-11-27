@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
 import { storage } from '@/lib/storage';
 import Link from 'next/link';
+import axiosInstance from '../axios/services';
+import { toast } from 'sonner';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -14,17 +16,25 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const users = storage.getUsers();
-    const user = users.find(u => u.email === email && u.password === password);
-
-    if (user) {
-      storage.setAuth({ user, isAuthenticated: true });
-      router.push('/dashboard');
-    } else {
-      setError('Email ou senha inválidos');
+    const data = {
+      email,
+      password
     }
+    try {
+      const response = await axiosInstance.post('/auth/login', data)
+      if (response.data.access_token) {
+        storage.setAuth( response.data.access_token);
+        toast.success('login realizado')
+        router.push('/dashboard');
+      }
+    } catch (error) {
+      if(error.response.data.message[0]){
+        toast.error(error.response.data.message[0])
+      }
+    }
+    
   };
 
   return (

@@ -37,8 +37,3 @@ export interface Expense {
   createdBy: string;
   date: string;
 }
-
-export interface AuthState {
-  user: User | null;
-  isAuthenticated: boolean;
-}

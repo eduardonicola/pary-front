@@ -1,4 +1,4 @@
-import { User, Event, AuthState } from './types';
+import { User, Event } from './types';
 
 const STORAGE_KEYS = {
   AUTH: 'auth_state',
@@ -7,14 +7,14 @@ const STORAGE_KEYS = {
 };
 
 export const storage = {
-  getAuth: (): AuthState => {
-    if (typeof window === 'undefined') return { user: null, isAuthenticated: false };
+  getAuth: (): string | null => {
+    if (typeof window === 'undefined') return null;
     const data = localStorage.getItem(STORAGE_KEYS.AUTH);
-    return data ? JSON.parse(data) : { user: null, isAuthenticated: false };
+    return data ? data : null;
   },
 
-  setAuth: (state: AuthState) => {
-    localStorage.setItem(STORAGE_KEYS.AUTH, JSON.stringify(state));
+  setAuth: (state: string) => {
+    localStorage.setItem(STORAGE_KEYS.AUTH, state);
   },
 
   clearAuth: () => {
