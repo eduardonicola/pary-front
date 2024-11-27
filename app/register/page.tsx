@@ -5,14 +5,15 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
-import { storage } from '@/lib/storage';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import axiosInstance from '../axios/services';
 
 export default function RegisterPage() {
   const router = useRouter();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -22,25 +23,23 @@ export default function RegisterPage() {
     setIsLoading(true);
     setError('');
 
-    try {
-      const users = storage.getUsers();
-      
-      if (users.some(u => u.email === email)) {
-        setError('Email já cadastrado');
-        return;
-      }
-
+    try {      
       const newUser = {
-        id: crypto.randomUUID(),
         name,
         email,
+        phone,
         password,
       };
+      
+      const response = await axiosInstance.post('/user', newUser);
 
-      storage.setUsers([...users, newUser]);
+      
       toast.success('Conta criada com sucesso!');
       router.push('/login');
     } catch (err) {
+      if(err.response.data.message[0]){
+        toast.error(err.response.data.message[0])
+      }
       setError('Erro ao criar conta. Tente novamente.');
     } finally {
       setIsLoading(false);
@@ -72,6 +71,17 @@ export default function RegisterPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={isLoading}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Telefone</label>
+              <Input
+                className='[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none'
+                type="number"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
                 required
                 disabled={isLoading}
               />
