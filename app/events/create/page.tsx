@@ -6,7 +6,7 @@ import { EventForm } from '@/components/events/event-form';
 import { storage } from '@/lib/storage';
 import { Event } from '@/lib/types';
 import { toast } from 'sonner';
-import axiosInstance from '@/app/axios/services';
+import axiosInstance from '@/hooks/axios/services';
 
 export default function CreateEventPage() {
   const router = useRouter();
@@ -43,8 +43,10 @@ export default function CreateEventPage() {
 
       toast.success('Evento criado com sucesso!');
       router.push('/dashboard');
-    } catch (error) {
-      toast.error(error.response.data.message[0]);
+    } catch (error: any) {
+      if(error?.response?.data?.message[0]){
+        toast.error(error?.response.data.message[0]);
+      }
     } finally {
       setIsSubmitting(false);
     }

@@ -1,4 +1,4 @@
-import axiosInstance from '@/app/axios/services';
+import axiosInstance from '@/hooks/axios/services';
 import { User, Event } from './types';
 import Cookies from 'js-cookie';
 

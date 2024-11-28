@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
 import { storage } from '@/lib/storage';
 import Link from 'next/link';
-import axiosInstance from '../axios/services';
+import axiosInstance from '../../hooks/axios/services';
 import { toast } from 'sonner';
 
 export default function LoginPage() {
@@ -32,8 +32,8 @@ export default function LoginPage() {
         toast.success('login realizado')
         router.push('/dashboard');
       }
-    } catch (error) {
-      if(error.response.data.message[0]){
+    } catch (error: any) {
+      if(error?.response?.data?.message[0]){
         toast.error(error.response.data.message[0])
       }
     }

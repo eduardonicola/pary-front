@@ -1,10 +1,18 @@
-'use client';
+"use client";
 
-import { Event } from '@/lib/types';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { CalendarIcon, Hash, MapPinIcon } from 'lucide-react';
-import { format } from 'date-fns';
-import { ptBR } from 'date-fns/locale';
+import { Event } from "@/lib/types";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
+import { CalendarIcon, Eye, Hash, MapPinIcon } from "lucide-react";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 interface EventListProps {
   events: Event[];
@@ -19,51 +27,80 @@ export function EventList({ events }: EventListProps) {
     );
   }
 
+  const router = useRouter();
+
+  const handleViewDetails = (event: Event) => {
+    router.push(`/events/${event.uuid_event}`);
+  };
+
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {events.map((event) => (
-        <Card key={event.uuid_event} className="hover:shadow-lg transition-shadow">
+        <Card
+          key={event.uuid_event}
+          className="hover:shadow-lg transition-shadow"
+        >
           <CardHeader>
             <CardTitle>{event.name}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
               <div className="space-y-1">
-              <p className="text-sm font-medium">Codigo do evento:</p>
-              <div className="flex items-center text-sm text-muted-foreground">
-                <Hash className="mr-2 h-4 w-4" />
-                <p className="w-full">{ event.uuid_event} </p> 
-              </div>
+                <p className="text-sm font-medium">Codigo do evento:</p>
+                <div className="flex items-center text-sm text-muted-foreground">
+                  <Hash className="mr-2 h-4 w-4" />
+                  <p className="w-full">{event.uuid_event} </p>
+                </div>
               </div>
               <div className="space-y-1">
                 <p className="text-sm font-medium">Data do evento:</p>
                 <div className="flex items-center text-sm text-muted-foreground">
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {format(new Date(event.date_and_time), "d 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                  {format(
+                    new Date(event.date_and_time),
+                    "d 'de' MMMM 'de' yyyy",
+                    { locale: ptBR }
+                  )}
                 </div>
               </div>
 
               <div className="space-y-1">
-                <p className="text-sm font-medium">Encerramento das inscrições:</p>
+                <p className="text-sm font-medium">
+                  Encerramento das inscrições:
+                </p>
                 <div className="flex items-center text-sm text-muted-foreground">
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {format(new Date(event.date_stop_sub), "d 'de' MMMM 'de' yyyy", { locale: ptBR })}
+                  {format(
+                    new Date(event.date_stop_sub),
+                    "d 'de' MMMM 'de' yyyy",
+                    { locale: ptBR }
+                  )}
                 </div>
               </div>
               <div className="space-y-1">
-              <p className="text-sm font-medium">Localização</p>
-              <div className="flex items-center text-sm text-muted-foreground">
-                <MapPinIcon className="mr-2 h-4 w-4" />
-                {event.locate}
-              </div>
+                <p className="text-sm font-medium">Localização</p>
+                <div className="flex items-center text-sm text-muted-foreground">
+                  <MapPinIcon className="mr-2 h-4 w-4" />
+                  {event.locate}
+                </div>
               </div>
 
               <div className="text-sm">
-                <span className="font-medium">Participantes:</span>{' '}
+                <span className="font-medium">Participantes:</span>{" "}
                 {event.participants.length}
               </div>
             </div>
           </CardContent>
+          <CardFooter>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => handleViewDetails(event)}
+            >
+              <Eye className="mr-2 h-4 w-4" />
+              Ver Detalhes
+            </Button>
+          </CardFooter>
         </Card>
       ))}
     </div>

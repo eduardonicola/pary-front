@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardHeader, CardContent, CardFooter } from '@/components/ui/card';
 import Link from 'next/link';
 import { toast } from 'sonner';
-import axiosInstance from '../axios/services';
+import axiosInstance from '../../hooks/axios/services';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -36,8 +36,8 @@ export default function RegisterPage() {
       
       toast.success('Conta criada com sucesso!');
       router.push('/login');
-    } catch (err) {
-      if(err.response.data.message[0]){
+    } catch (err: any) {
+      if(err?.response?.data?.message[0]){
         toast.error(err.response.data.message[0])
       }
       setError('Erro ao criar conta. Tente novamente.');
