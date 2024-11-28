@@ -1,39 +1,44 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select';
-import { Card, CardContent } from '@/components/ui/card';
-import { Event } from '@/lib/types';
+} from "@/components/ui/select";
+import { Card, CardContent } from "@/components/ui/card";
+import { Event } from "@/lib/types";
+import { Textarea } from "../ui/textarea";
 
 interface EventFormProps {
-  onSubmit: (data: Omit<Event, 'id' | 'code' | 'ownerId' | 'participants' | 'expenses'>) => void;
+  onSubmit: (
+    data: Omit<Event, "userLevel" | "participants" | "spents" | "uuid_event">
+  ) => void;
   isSubmitting: boolean;
 }
 
 export function EventForm({ onSubmit, isSubmitting }: EventFormProps) {
-  const [name, setName] = useState('');
-  const [location, setLocation] = useState('');
-  const [date, setDate] = useState('');
-  const [registrationDeadline, setRegistrationDeadline] = useState('');
-  const [costDivisionType, setCostDivisionType] = useState<'equal' | 'consumption'>('equal');
+  const [name, setName] = useState("");
+  const [description, setDiscription] = useState("");
+  const [locate, setLocate] = useState("");
+  const [date_and_time, setDate] = useState("");
+  const [date_stop_sub, setRegistrationDeadline] = useState("");
+  const [egalitarian, setCostDivisionType] = useState(true);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit({
       name,
-      location,
-      date,
-      registrationDeadline,
-      costDivisionType,
+      locate,
+      description,
+      date_and_time,
+      date_stop_sub,
+      egalitarian,
     });
   };
 
@@ -50,14 +55,23 @@ export function EventForm({ onSubmit, isSubmitting }: EventFormProps) {
               required
               disabled={isSubmitting}
             />
+            <div className="space-y-2">
+              <Label htmlFor="description">Dexctição</Label>
+              <Textarea
+                id="description"
+                value={description}
+                onChange={(e) => setDiscription(e.target.value)}
+                required
+                disabled={isSubmitting}
+              />
+            </div>
           </div>
-
           <div className="space-y-2">
-            <Label htmlFor="location">Local</Label>
+            <Label htmlFor="locate">Local</Label>
             <Input
-              id="location"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
+              id="locate"
+              value={locate}
+              onChange={(e) => setLocate(e.target.value)}
               required
               disabled={isSubmitting}
             />
@@ -69,7 +83,7 @@ export function EventForm({ onSubmit, isSubmitting }: EventFormProps) {
               <Input
                 id="date"
                 type="datetime-local"
-                value={date}
+                value={date_and_time}
                 onChange={(e) => setDate(e.target.value)}
                 required
                 disabled={isSubmitting}
@@ -81,7 +95,7 @@ export function EventForm({ onSubmit, isSubmitting }: EventFormProps) {
               <Input
                 id="registrationDeadline"
                 type="datetime-local"
-                value={registrationDeadline}
+                value={date_stop_sub}
                 onChange={(e) => setRegistrationDeadline(e.target.value)}
                 required
                 disabled={isSubmitting}
@@ -92,8 +106,10 @@ export function EventForm({ onSubmit, isSubmitting }: EventFormProps) {
           <div className="space-y-2">
             <Label htmlFor="costDivisionType">Tipo de Divisão de Custos</Label>
             <Select
-              value={costDivisionType}
-              onValueChange={(value: 'equal' | 'consumption') => setCostDivisionType(value)}
+              value={egalitarian ? "equal" : "consumption"}
+              onValueChange={(value: "equal" | "consumption") =>
+                setCostDivisionType(value == "equal")
+              }
               disabled={isSubmitting}
             >
               <SelectTrigger>
@@ -116,7 +132,7 @@ export function EventForm({ onSubmit, isSubmitting }: EventFormProps) {
               Cancelar
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Criando...' : 'Criar Evento'}
+              {isSubmitting ? "Criando..." : "Criar Evento"}
             </Button>
           </div>
         </form>

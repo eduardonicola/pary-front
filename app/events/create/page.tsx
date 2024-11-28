@@ -6,45 +6,45 @@ import { EventForm } from '@/components/events/event-form';
 import { storage } from '@/lib/storage';
 import { Event } from '@/lib/types';
 import { toast } from 'sonner';
+import axiosInstance from '@/app/axios/services';
 
 export default function CreateEventPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (eventData: Omit<Event, 'id' | 'code' | 'ownerId' | 'participants' | 'expenses'>) => {
+  const handleSubmit = async (eventData: Omit<Event, 'userLevel' | 'participants' | 'spents' | 'uuid_event'>) => {
     setIsSubmitting(true);
     try {
       const auth = storage.getAuth();
-      if (!auth.user) {
+      const user = storage.getUser()
+      if (!auth) {
         toast.error('Usuário não autenticado');
         router.push('/login');
         return;
       }
-
-      const newEvent: Event = {
-        ...eventData,
-        id: crypto.randomUUID(),
-        code: Math.random().toString(36).substring(2, 8).toUpperCase(),
-        ownerId: auth.user.id,
-        participants: [{
-          userId: auth.user.id,
-          role: 'owner',
-          preferences: {
-            hardDrinks: false,
-            drinks: false,
-            pastimeActivities: false,
-          }
-        }],
-        expenses: []
-      };
-
-      const events = storage.getEvents();
-      storage.setEvents([...events, newEvent]);
+      const dateAndTime = new Date(eventData.date_and_time);
+      const dateStopSub = new Date(eventData.date_stop_sub);
       
+      if(dateStopSub < dateAndTime){
+        toast.error('Prazo de inscrição deve ser maior que a data do evento');
+        return
+      }
+      const newEvent: Omit<Event, 'userLevel' | 'participants' | 'spents' | 'uuid_event'> = {
+        ...eventData,
+      };
+      newEvent.date_and_time  = dateAndTime.toISOString()
+      newEvent.date_stop_sub  = dateStopSub.toISOString()
+
+      const response = await axiosInstance.post('/event', newEvent)
+      
+      if(response.data){
+        console.log(response);
+      }
+
       toast.success('Evento criado com sucesso!');
       router.push('/dashboard');
     } catch (error) {
-      toast.error('Erro ao criar evento');
+      toast.error(error.response.data.message[0]);
     } finally {
       setIsSubmitting(false);
     }

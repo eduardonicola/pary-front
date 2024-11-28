@@ -1,39 +1,33 @@
 export interface User {
-  id: string;
+  uuid_user: string;
   name: string;
   email: string;
-  password: string;
 }
 
 export interface Event {
-  id: string;
-  code: string;
+  uuid_event: string;
   name: string;
-  location: string;
-  date: string;
-  registrationDeadline: string;
-  costDivisionType: 'equal' | 'consumption';
-  ownerId: string;
+  locate: string;
+  description: string;
+  date_and_time: string;
+  date_stop_sub: string;
+  egalitarian: boolean;
+  userLevel: 'guest'| 'owner' | 'manager';
   participants: Participant[];
-  expenses: Expense[];
+  spents: Spent[];
 }
 
 export interface Participant {
-  userId: string;
-  role: 'owner' | 'manager' | 'participant';
-  preferences: {
-    hardDrinks: boolean;
-    drinks: boolean;
-    pastimeActivities: boolean;
-  };
+  uuid_user: string;
+  name: string  
 }
 
-export interface Expense {
-  id: string;
+export interface Spent {
+  uuid_spent: string;
   name: string;
-  quantity: number;
-  value: number;
-  category: 'hardDrinks' | 'drinks' | 'food' | 'location';
-  createdBy: string;
-  date: string;
+  description: string;
+  amount: number;
+  value: string;
+  type_spent: 'hard_drink' | 'drink' | 'food' | 'pastime';
 }
+

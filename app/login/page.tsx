@@ -15,6 +15,8 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [user, setUser] = useState('');
+
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,6 +28,7 @@ export default function LoginPage() {
       const response = await axiosInstance.post('/auth/login', data)
       if (response.data.access_token) {
         storage.setAuth( response.data.access_token);
+        storage.setUser(response.data)
         toast.success('login realizado')
         router.push('/dashboard');
       }

@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Plus } from 'lucide-react';
+import { LogOutIcon, Plus } from 'lucide-react';
 import { storage } from '@/lib/storage';
 import { Event } from '@/lib/types';
 import { EventList } from '@/components/events/event-list';
@@ -16,20 +16,24 @@ export default function DashboardPage() {
   const [events, setEvents] = useState<Event[]>([]);
   const [showJoinDialog, setShowJoinDialog] = useState(false);
   const [eventCode, setEventCode] = useState('');
+  const [userCode, getUser] = useState('');
   const auth = storage.getAuth();
+  const user = storage.getUser()
+
+  const featchEvents = async () =>{
+    setEvents(await storage.getEvents());
+  }
 
   useEffect(() => {
-    if (!auth.isAuthenticated) {
+    if (!auth) {
       router.push('/login');
       return;
     }
-    setEvents(storage.getEvents());
+    featchEvents()
   }, [router]);
 
-  const createdEvents = events.filter(event => event.ownerId === auth.user?.id);
-  const participatingEvents = events.filter(
-    event => event.participants.some(p => p.userId === auth.user?.id && p.role !== 'owner')
-  );
+  const createdEvents = events.filter(event => event.userLevel === 'owner' || event.userLevel === 'manager');
+  const participatingEvents = events.filter(event => event.userLevel !== 'owner');
 
   const handleCreateEvent = () => {
     router.push('/events/create');
@@ -38,7 +42,10 @@ export default function DashboardPage() {
   const handleJoinEvent = () => {
     setShowJoinDialog(true);
   };
-
+  const handLogOut = () => {
+    storage.clearAuth()
+    router.push('/login')
+  }
   return (
     <div className="container mx-auto py-8">
       <div className="flex justify-between items-center mb-8">
@@ -59,13 +66,17 @@ export default function DashboardPage() {
             <Plus className="mr-2 h-4 w-4" />
             Criar Evento
           </Button>
+          <Button onClick={handLogOut}>
+            <LogOutIcon className="mr-2 h-4 w-4" />
+            Sair 
+          </Button>
         </div>
       </div>
 
       <Tabs defaultValue="created" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="created">Eventos Criados</TabsTrigger>
-          <TabsTrigger value="participating">Eventos Participando</TabsTrigger>
+          <TabsTrigger value="created">Genciando</TabsTrigger>
+          <TabsTrigger value="participating">Participando</TabsTrigger>
         </TabsList>
         <TabsContent value="created">
           <EventList events={createdEvents} />

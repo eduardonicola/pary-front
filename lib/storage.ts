@@ -1,43 +1,46 @@
+import axiosInstance from '@/app/axios/services';
 import { User, Event } from './types';
+import Cookies from 'js-cookie';
+
 
 const STORAGE_KEYS = {
-  AUTH: 'auth_state',
   EVENTS: 'events',
-  USERS: 'users',
+  USER: 'user',
 };
-
+const COOKIE_KEYS = {
+  AUTH: 'auth_state', 
+};
 export const storage = {
   getAuth: (): string | null => {
-    if (typeof window === 'undefined') return null;
-    const data = localStorage.getItem(STORAGE_KEYS.AUTH);
-    return data ? data : null;
+    // Recupera o valor do cookie
+    return Cookies.get(COOKIE_KEYS.AUTH) || null;
   },
 
   setAuth: (state: string) => {
-    localStorage.setItem(STORAGE_KEYS.AUTH, state);
+    // Define o valor no cookie
+    Cookies.set(COOKIE_KEYS.AUTH, state, { expires: 360 }); 
   },
 
   clearAuth: () => {
-    localStorage.removeItem(STORAGE_KEYS.AUTH);
+    Cookies.remove(COOKIE_KEYS.AUTH);
   },
 
-  getEvents: (): Event[] => {
-    if (typeof window === 'undefined') return [];
-    const data = localStorage.getItem(STORAGE_KEYS.EVENTS);
-    return data ? JSON.parse(data) : [];
+  getUser: (): User | null => {
+    if (typeof window === 'undefined') return null;
+    const data = localStorage.getItem(STORAGE_KEYS.USER);
+    return data ? JSON.parse(data) : null;
   },
 
-  setEvents: (events: Event[]) => {
-    localStorage.setItem(STORAGE_KEYS.EVENTS, JSON.stringify(events));
+  setUser: (user: User) => {
+    localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
   },
-
-  getUsers: (): User[] => {
-    if (typeof window === 'undefined') return [];
-    const data = localStorage.getItem(STORAGE_KEYS.USERS);
-    return data ? JSON.parse(data) : [];
-  },
-
-  setUsers: (users: User[]) => {
-    localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
-  },
+  getEvents: async () : Promise<Event[]> =>{
+    try {
+     const response = await axiosInstance.get('/event')
+     return response.data
+    } catch (error) {
+      console.error(error)
+    }
+    return []
+  }
 };
