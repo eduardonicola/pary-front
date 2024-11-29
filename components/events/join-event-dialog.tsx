@@ -13,71 +13,70 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { storage } from '@/lib/storage';
 import { toast } from 'sonner';
-
+import { useRouter } from 'next/navigation';
+import axiosInstance from '@/hooks/axios/services';
 interface JoinEventDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   eventCode: string;
+  resetlist: () => void
 }
+
 
 export function JoinEventDialog({
   open,
   onOpenChange,
+  resetlist,
   eventCode,
 }: JoinEventDialogProps) {
   const [hardDrinks, setHardDrinks] = useState(false);
   const [drinks, setDrinks] = useState(false);
   const [pastimeActivities, setPastimeActivities] = useState(false);
+  const [food, setFood] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter()
 
-  const handleJoin = () => {
+
+  const handleJoin = async () => {
     setIsLoading(true);
     const auth = storage.getAuth();
-    const events = storage.getEvents();
-    const event = events.find(e => e.code === eventCode);
 
-    if (!event) {
-      toast.error('Evento não encontrado');
-      setIsLoading(false);
-      return;
-    }
-
-    if (!auth.user) {
+    if (!auth) {
       toast.error('Usuário não autenticado');
+      router.push('/login')
       setIsLoading(false);
       return;
     }
 
-    if (event.participants.some(p => p.userId === auth.user?.id)) {
-      toast.error('Você já participa deste evento');
-      setIsLoading(false);
-      return;
+    try {
+      const response = await  axiosInstance.post(`${'/subscription/'+eventCode}`, {
+        hard_drink: hardDrinks,
+        drink: drinks,
+        food: food,
+        pastime: pastimeActivities,
+      })
+  
+      if(response.data.subscribe){
+        toast.success('Você entrou no evento com sucesso!');
+        onOpenChange(false);
+        setIsLoading(false);
+        resetlist()
+      }
+  
+    } catch (error: any) {
+      if(error?.response?.data?.message){
+        toast.error(error.response.data.message);
+        onOpenChange(false);
+        setIsLoading(false);
+        resetlist()
+      }else{
+        toast.error("Erro ao se iscrever");
+        onOpenChange(false);
+        setIsLoading(false);
+        resetlist()
+      }    
     }
-
-    const updatedEvent = {
-      ...event,
-      participants: [
-        ...event.participants,
-        {
-          userId: auth.user.id,
-          role: 'participant',
-          preferences: {
-            hardDrinks,
-            drinks,
-            pastimeActivities,
-          },
-        },
-      ],
-    };
-
-    const updatedEvents = events.map(e =>
-      e.id === event.id ? updatedEvent : e
-    );
-
-    storage.setEvents(updatedEvents);
-    toast.success('Você entrou no evento com sucesso!');
-    onOpenChange(false);
-    setIsLoading(false);
+  
   };
 
   return (
@@ -110,6 +109,14 @@ export function JoinEventDialog({
               onCheckedChange={(checked) => setPastimeActivities(checked as boolean)}
             />
             <Label htmlFor="pastimeActivities">Participará de atividades de passatempo</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="food"
+              checked={food}
+              onCheckedChange={(checked) => setFood(checked as boolean)}
+            />
+            <Label htmlFor="food">Consumo de alimentos</Label>
           </div>
         </div>
         <DialogFooter>

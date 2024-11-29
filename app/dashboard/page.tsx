@@ -10,15 +10,15 @@ import { Event } from '@/lib/types';
 import { EventList } from '@/components/events/event-list';
 import { JoinEventDialog } from '@/components/events/join-event-dialog';
 import { useRouter } from 'next/navigation';
+import { validate as validateUUID } from 'uuid';
+import { toast } from 'sonner';
 
 export default function DashboardPage() {
   const router = useRouter();
   const [events, setEvents] = useState<Event[]>([]);
   const [showJoinDialog, setShowJoinDialog] = useState(false);
   const [eventCode, setEventCode] = useState('');
-  const [userCode, getUser] = useState('');
   const auth = storage.getAuth();
-  const user = storage.getUser()
 
   const featchEvents = async () =>{
     setEvents(await storage.getEvents());
@@ -40,7 +40,12 @@ export default function DashboardPage() {
   };
 
   const handleJoinEvent = () => {
-    setShowJoinDialog(true);
+    const isUUID = validateUUID(eventCode)
+    if(eventCode && isUUID){
+      setShowJoinDialog(true);
+      return
+    }
+    toast.error('Informe um codigo de evento valido');
   };
   const handLogOut = () => {
     storage.clearAuth()
@@ -90,6 +95,7 @@ export default function DashboardPage() {
         open={showJoinDialog}
         onOpenChange={setShowJoinDialog}
         eventCode={eventCode}
+        resetlist={featchEvents}
       />
     </div>
   );
