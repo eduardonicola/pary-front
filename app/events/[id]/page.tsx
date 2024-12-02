@@ -25,6 +25,8 @@ import {
 } from "@/components/ui/accordion";
 import { EventDetailsInfo } from "@/components/events/exib-info-event";
 import { toast } from "sonner";
+import { ConfirmAction } from "@/components/events/action-confirm";
+import axiosInstance from "@/hooks/axios/services";
 
 export default function EventDetailsPage() {
   const params = useParams();
@@ -34,6 +36,11 @@ export default function EventDetailsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditEvent, setEditEvent] = useState(false);
   const [selectedSpent, setSelectedSpent] = useState<Spent | null>(null);
+  const [modalActions, setModalActions] = useState({
+    event: false,
+    spent: false,
+  });
+
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -97,29 +104,92 @@ export default function EventDetailsPage() {
     setIsModalOpen(!isModalOpen);
   };
 
-  const handleEditSpent = (spent: Spent) =>{
-    setSelectedSpent(spent)
+  const handleEditSpent = (spent: Spent) => {
+    setSelectedSpent(spent);
     setIsModalOpen(true);
+  };
+
+  const onCloseModalSpent = () => {
+    setSelectedSpent(null);
+    setIsModalOpen(false);
+  };
+
+  const handleCloseActions = () => {
+    setModalActions({
+      event:false,
+      spent:false,
+    })
+    setSelectedSpent(null);
+  } 
+
+  const openDeletEvent = () =>{
+    setModalActions({
+      event:true,
+      spent:false,
+    })
   }
 
-  const onCloseModalSpent = () =>{
-    setSelectedSpent(null)
-    setIsModalOpen(false)
+  const openDeletSpent = (spent : Spent) =>{
+    setModalActions({
+      event:false,
+      spent:true,
+    })
+    setSelectedSpent(spent)
+  }
+
+  const clearListSpent = () =>{
+    const index = event.spent.findIndex(item => item.uuid_spent == selectedSpent?.uuid_spent)
+    if(index >= 0){
+      event.spent.splice(index ,1)
+    }
+    handleCloseActions()
+  }
+
+  const deleteSpent = async () => {
+    if(selectedSpent && selectedSpent.uuid_spent){
+      try {
+        const response = await axiosInstance.delete(`/spent/${selectedSpent.uuid_spent}/${event.uuid_event}`)
+        if(response.data.message){
+          toast.success(response.data.message)
+          clearListSpent()
+        }
+      } catch (error: any) {
+        if(error?.response?.data?.message){
+          toast.error(error.response.data.message)
+        }
+      }
+    }
+  }
+
+  const deleteEvent = async () => {
+    try {
+      const response = await axiosInstance.delete(`/event/${event.uuid_event}`)
+      if(response.data.message){
+        toast.success(response.data.message)
+        router.push('/dashboard')
+      }
+    } catch (error: any) {
+      if(error?.response?.data?.message){
+        toast.error(error.response.data.message)
+        router.push('/dashboard')
+      }
+    }
   }
 
   const activeEdit = () => setEditEvent(!isEditEvent);
 
   const addSpent = (newSpent: Spent) => {
-    const findSpent = event.spent.findIndex((item) => item.uuid_spent == newSpent.uuid_spent)
+    const findSpent = event.spent.findIndex(
+      (item) => item.uuid_spent == newSpent.uuid_spent
+    );
     if (findSpent >= 0) {
       event.spent[findSpent] = { ...event.spent[findSpent], ...newSpent };
-      toast.success('Despesa editada')
+      toast.success("Despesa editada");
 
-      return
-    } 
+      return;
+    }
     event.spent.push(newSpent);
-    toast.success('Despesa criada')
-
+    toast.success("Despesa criada");
   };
 
   return (
@@ -139,13 +209,13 @@ export default function EventDetailsPage() {
                   onClick={activeEdit}
                   className="h-5 w-5 text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer"
                 />
-                <Trash className="h-5 w-5 text-muted-foreground hover:text-red-600 dark:hover:text-red-400 transition-colors cursor-pointer" />
+                <Trash onClick={openDeletEvent} className="h-5 w-5 text-muted-foreground hover:text-red-600 dark:hover:text-red-400 transition-colors cursor-pointer" />
               </div>
             ) : null}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {isEditEvent ? (null) : <EventDetailsInfo event={event}/>}
+          {isEditEvent ? null : <EventDetailsInfo event={event} />}
 
           <div className="space-y-4">
             <Accordion type="single" collapsible>
@@ -195,10 +265,12 @@ export default function EventDetailsPage() {
                   <div className="flex items-center">
                     <Wallet className="mr-2 h-4 w-4" />
                     <span className="font-medium">Despesas</span>
-                    <Plus
-                      onClick={(e) => handleCreateSpent(e)}
-                      className="mx-2 h-4 w-4"
-                    />
+                    {isLevelEdit ? (
+                      <Plus
+                        onClick={(e) => handleCreateSpent(e)}
+                        className="mx-2 h-4 w-4"
+                      />
+                    ) : null}
                   </div>
                 </AccordionTrigger>
                 <AccordionContent>
@@ -210,8 +282,11 @@ export default function EventDetailsPage() {
                             <span>{spent.name}</span>
                             {isLevelEdit ? (
                               <div className="flex gap-2 items-center mr-2">
-                                <Pencil  onClick={() => handleEditSpent(spent)} className="h-4 w-4 text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer" />
-                                <Trash className="h-4 w-4 text-muted-foreground hover:text-red-600 dark:hover:text-red-400 transition-colors cursor-pointer" />
+                                <Pencil
+                                  onClick={() => handleEditSpent(spent)}
+                                  className="h-4 w-4 text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer"
+                                />
+                                <Trash onClick={() => openDeletSpent(spent)} className="h-4 w-4 text-muted-foreground hover:text-red-600 dark:hover:text-red-400 transition-colors cursor-pointer" />
                               </div>
                             ) : null}
                           </div>
@@ -261,6 +336,23 @@ export default function EventDetailsPage() {
         addListSpent={addSpent}
         propsIdEvent={event.uuid_event}
       />
+
+      <ConfirmAction 
+        isOpen={modalActions['event']}
+        onClose={handleCloseActions}
+        title="Deletar evento"
+        callConfirmAction={deleteEvent}
+      >
+        Ao confirmar essa ação não pode ser revertida 
+      </ConfirmAction>
+      <ConfirmAction 
+        isOpen={modalActions['spent']}
+        onClose={handleCloseActions}
+        title="Deletar despesas"
+        callConfirmAction={deleteSpent}
+      >
+        Ao confirmar essa ação não pode ser revertida 
+      </ConfirmAction>
     </div>
   );
 }

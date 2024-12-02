@@ -56,7 +56,7 @@ export function EventForm({ onSubmit, isSubmitting }: EventFormProps) {
               disabled={isSubmitting}
             />
             <div className="space-y-2">
-              <Label htmlFor="description">Dexctição</Label>
+              <Label htmlFor="description">descrição</Label>
               <Textarea
                 id="description"
                 value={description}
