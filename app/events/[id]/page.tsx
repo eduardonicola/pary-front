@@ -2,13 +2,11 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { AdditinalUser, Event, EventEdits, EventSpec, Spent } from "@/lib/types";
+import { AdditinalUser, Event, EventEdits, EventSpec, Participant, Spent } from "@/lib/types";
 import { storage } from "@/lib/storage";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
-  CalendarIcon,
-  MapPinIcon,
   ArrowLeft,
   Users,
   Wallet,
@@ -28,6 +26,7 @@ import { toast } from "sonner";
 import { ConfirmAction } from "@/components/events/action-confirm";
 import axiosInstance from "@/hooks/axios/services";
 import { EditEventForm } from "@/components/events/form-edit-event";
+import ModalEditLevel from "@/components/events/user-level";
 
 export default function EventDetailsPage() {
   const params = useParams();
@@ -37,6 +36,12 @@ export default function EventDetailsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditEvent, setEditEvent] = useState(false);
   const [selectedSpent, setSelectedSpent] = useState<Spent | null>(null);
+  const [ modalLevelEdit , setModalLevelEdit ] = useState(false)
+  const [ selectedUser , setSelectedUser] = useState<Participant>({
+    name: '',
+    user_level: 'guest',
+    uuid_user: '',
+  })
   const [modalActions, setModalActions] = useState({
     event: false,
     spent: false,
@@ -89,7 +94,7 @@ export default function EventDetailsPage() {
 
   const lislistLevels = {
     owner: "Dono",
-    maneger: "Gestor",
+    manager: "Gestor",
     guest: "Partcipante",
   };
 
@@ -97,7 +102,7 @@ export default function EventDetailsPage() {
 
   const isLevelEdit = event.userLevel != "guest";
 
-  const showLevel = (strin: "owner" | "maneger" | "guest") =>
+  const showLevel = (strin: "owner" | "manager" | "guest") =>
     lislistLevels[strin];
 
   const handleCreateSpent = (e: React.MouseEvent<SVGSVGElement>) => {
@@ -184,6 +189,26 @@ export default function EventDetailsPage() {
 
   const activeEdit = () => setEditEvent(!isEditEvent);
 
+  const editList = (item: Participant) =>{    
+    const index = event.participants.findIndex(parti => parti.uuid_user == selectedUser.uuid_user)
+    event.participants[index].user_level = item.user_level
+  }
+
+  const onCloseEditLevel = () =>{
+    setSelectedUser({
+      name: '',
+      user_level: 'guest',
+      uuid_user: '',
+    })
+    setModalLevelEdit(false)
+  }
+
+  const onEditLevel = (select: Participant) => {
+    setSelectedUser(select)
+    setModalLevelEdit(true)
+
+  }
+
   const addSpent = (newSpent: Spent) => {
     const findSpent = event.spent.findIndex(
       (item) => item.uuid_spent == newSpent.uuid_spent
@@ -245,7 +270,7 @@ export default function EventDetailsPage() {
                           <span>{participant.name} </span>
                           <div className="flex items-center ">
                             {isOwner && isLevelEdit ? (
-                              <Pencil className="h-4 mr-2 w-4 text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400" />
+                              <Pencil onClick={() => onEditLevel(participant)} className="h-4 mr-2 w-4 text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400" />
                             ) : null}
                             <span>{showLevel(participant.user_level)}</span>
                           </div>
@@ -359,6 +384,13 @@ export default function EventDetailsPage() {
       >
         Ao confirmar essa ação não pode ser revertida 
       </ConfirmAction>
+      <ModalEditLevel 
+        uuid_event={event.uuid_event}
+        isOpen={modalLevelEdit}
+        editList={(e: Participant) => editList(e)}
+        onClose={onCloseEditLevel}
+        userSelected={selectedUser}
+      />
     </div>
   );
 }

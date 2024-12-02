@@ -29,7 +29,7 @@ export interface EventEdits {
 export interface Participant {
   uuid_user: string;
   name: string
-  user_level: 'owner' | 'maneger' | 'guest'
+  user_level: 'owner' | 'manager' | 'guest'
 }
 export interface Spent {
   uuid_spent: string;
