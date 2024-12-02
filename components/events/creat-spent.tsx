@@ -14,19 +14,25 @@ interface ExpenseModalProps {
   onClose: () => void;
   addListSpent:(item : Spent) => void;
   propsIdEvent: string;
+  isEditSpent: Spent | null
 }
 
-export function CreatSpent({ isOpen, onClose, addListSpent, propsIdEvent }: ExpenseModalProps) {
+export function CreatSpent({ isOpen, onClose, addListSpent, propsIdEvent, isEditSpent }: ExpenseModalProps) {
 
-  const handleSubmit = async (data: Omit<Spent, "uuid_spent">) => {
+  const handleSubmit = async (data: Spent | Omit<Spent, "uuid_spent">) => {
     if(data.amount <= 0){
       toast.error("Quantidade deve ser maior que 0")
       return
     }
+    const isEdited = isEditSpent && isEditSpent.uuid_spent
+    if(isEdited){
+      delete data.uuid_spent
+    }
+    const url = isEdited ? `/spent/${isEditSpent.uuid_spent}` : '/spent'
+
     try {
-      const resp = await axiosInstance.post('/spent', {...data, uuid_event: propsIdEvent})
+      const resp = await axiosInstance.post(url, {...data, uuid_event: propsIdEvent})
       if(resp.data){
-        toast.success('Despesa criada')
         addListSpent(resp.data)
         onClose()
       }
@@ -42,9 +48,9 @@ export function CreatSpent({ isOpen, onClose, addListSpent, propsIdEvent }: Expe
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Adicionar Despesa</DialogTitle>
+          <DialogTitle>{!isEditSpent ? 'Adicionar Despesa' : 'Editar Despesa'}</DialogTitle>
         </DialogHeader>
-        <SpentForm onSubmit={handleSubmit} onCancel={onClose} />
+        <SpentForm isEditSpent={isEditSpent} onSubmit={handleSubmit} onCancel={onClose} />
       </DialogContent>
     </Dialog>
   );

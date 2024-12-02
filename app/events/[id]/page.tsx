@@ -16,8 +16,6 @@ import {
   Pencil,
   Trash,
 } from "lucide-react";
-import { format } from "date-fns";
-import { ptBR } from "date-fns/locale";
 import { CreatSpent } from "@/components/events/creat-spent";
 import {
   Accordion,
@@ -25,6 +23,8 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { EventDetailsInfo } from "@/components/events/exib-info-event";
+import { toast } from "sonner";
 
 export default function EventDetailsPage() {
   const params = useParams();
@@ -32,6 +32,8 @@ export default function EventDetailsPage() {
   const [event, setEvent] = useState<EventSpec | null>(null);
   const [additional, setAdditional] = useState<AdditinalUser | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditEvent, setEditEvent] = useState(false);
+  const [selectedSpent, setSelectedSpent] = useState<Spent | null>(null);
 
   useEffect(() => {
     const fetchEvent = async () => {
@@ -58,6 +60,7 @@ export default function EventDetailsPage() {
       </div>
     );
   }
+
   const totalSpent = event.spent.reduce((acc, curr) => {
     const value = Number(curr.value); // Converte o valor para número
     const amount = curr.amount; // Obtém a quantidade
@@ -94,8 +97,29 @@ export default function EventDetailsPage() {
     setIsModalOpen(!isModalOpen);
   };
 
+  const handleEditSpent = (spent: Spent) =>{
+    setSelectedSpent(spent)
+    setIsModalOpen(true);
+  }
+
+  const onCloseModalSpent = () =>{
+    setSelectedSpent(null)
+    setIsModalOpen(false)
+  }
+
+  const activeEdit = () => setEditEvent(!isEditEvent);
+
   const addSpent = (newSpent: Spent) => {
+    const findSpent = event.spent.findIndex((item) => item.uuid_spent == newSpent.uuid_spent)
+    if (findSpent >= 0) {
+      event.spent[findSpent] = { ...event.spent[findSpent], ...newSpent };
+      toast.success('Despesa editada')
+
+      return
+    } 
     event.spent.push(newSpent);
+    toast.success('Despesa criada')
+
   };
 
   return (
@@ -109,52 +133,19 @@ export default function EventDetailsPage() {
         <CardHeader>
           <CardTitle className="flex justify-between">
             {event.name}
-
             {isLevelEdit ? (
-              <div className="flex gap-2">
-                <Pencil className="h-5 w-5 text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer" />
+              <div className="flex gap-2 items-center">
+                <Pencil
+                  onClick={activeEdit}
+                  className="h-5 w-5 text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer"
+                />
                 <Trash className="h-5 w-5 text-muted-foreground hover:text-red-600 dark:hover:text-red-400 transition-colors cursor-pointer" />
               </div>
             ) : null}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <div className="flex items-center">
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                <span className="font-medium">Data do Evento:</span>
-              </div>
-              <p className="text-muted-foreground">
-                {format(
-                  new Date(event.date_and_time),
-                  "d 'de' MMMM 'de' yyyy 'às' HH:mm",
-                  { locale: ptBR }
-                )}
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <div className="flex items-center">
-                <MapPinIcon className="mr-2 h-4 w-4" />
-                <span className="font-medium">Localização:</span>
-              </div>
-              <p className="text-muted-foreground">{event.locate}</p>
-            </div>
-          </div>
-
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-2">
-              <h3 className="text-lg font-medium mb-2">Descrição</h3>
-              <p className="text-muted-foreground">{event.description}</p>
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-lg font-medium mb-2">Tipo de Divisão</h3>
-              <p className="text-muted-foreground">
-                {event.egalitarian ? "Igalitaria" : "Por consumo"}
-              </p>
-            </div>
-          </div>
+          {isEditEvent ? (null) : <EventDetailsInfo event={event}/>}
 
           <div className="space-y-4">
             <Accordion type="single" collapsible>
@@ -219,7 +210,7 @@ export default function EventDetailsPage() {
                             <span>{spent.name}</span>
                             {isLevelEdit ? (
                               <div className="flex gap-2 items-center mr-2">
-                                <Pencil className="h-4 w-4 text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer" />
+                                <Pencil  onClick={() => handleEditSpent(spent)} className="h-4 w-4 text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer" />
                                 <Trash className="h-4 w-4 text-muted-foreground hover:text-red-600 dark:hover:text-red-400 transition-colors cursor-pointer" />
                               </div>
                             ) : null}
@@ -264,8 +255,9 @@ export default function EventDetailsPage() {
       </Card>
 
       <CreatSpent
+        isEditSpent={selectedSpent}
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={() => onCloseModalSpent()}
         addListSpent={addSpent}
         propsIdEvent={event.uuid_event}
       />

@@ -1,24 +1,40 @@
-import { useState } from 'react';
-import { DialogFooter } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Spent } from '@/lib/types';
+import { useEffect, useState } from "react";
+import { DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Spent } from "@/lib/types";
 
 interface ExpenseFormProps {
-  onSubmit: (data: Omit<Spent, 'uuid_spent'>) => void;
+  onSubmit: (data: Omit<Spent, "uuid_spent">) => void;
   onCancel: () => void;
+  isEditSpent: Spent | null;
 }
 
-export function SpentForm({ onSubmit, onCancel }: ExpenseFormProps) {
-  const [formData, setFormData] = useState<Omit<Spent, 'uuid_spent'>>({
-    name: '',
-    description: '',
+export function SpentForm({
+  onSubmit,
+  onCancel,
+  isEditSpent,
+}: ExpenseFormProps) {
+  useEffect(() => {
+    if (isEditSpent && isEditSpent.uuid_spent) {
+      setFormData(isEditSpent );
+    }
+  }, [isEditSpent])
+  const [formData, setFormData] = useState<Omit<Spent, "uuid_spent"> | Spent>({
+    name: "",
+    description: "",
     amount: 0,
-    value: '',
-    type_spent: 'food',
+    value: "",
+    type_spent: "food",
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -44,7 +60,9 @@ export function SpentForm({ onSubmit, onCancel }: ExpenseFormProps) {
           <Textarea
             id="description"
             value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, description: e.target.value })
+            }
           />
         </div>
 
@@ -56,7 +74,9 @@ export function SpentForm({ onSubmit, onCancel }: ExpenseFormProps) {
             required
             min="0"
             value={formData.amount}
-            onChange={(e) => setFormData({ ...formData, amount: Number(e.target.value) })}
+            onChange={(e) =>
+              setFormData({ ...formData, amount: Number(e.target.value) })
+            }
           />
         </div>
 
@@ -66,7 +86,9 @@ export function SpentForm({ onSubmit, onCancel }: ExpenseFormProps) {
             id="value"
             required
             value={formData.value}
-            onChange={(e) => setFormData({ ...formData, value: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, value: e.target.value })
+            }
           />
         </div>
 
@@ -74,7 +96,12 @@ export function SpentForm({ onSubmit, onCancel }: ExpenseFormProps) {
           <Label htmlFor="type">Tipo de Despesa</Label>
           <Select
             value={formData.type_spent}
-            onValueChange={(value) => setFormData({ ...formData, type_spent: value as Spent['type_spent'] })}
+            onValueChange={(value) =>
+              setFormData({
+                ...formData,
+                type_spent: value as Spent["type_spent"],
+              })
+            }
           >
             <SelectTrigger>
               <SelectValue placeholder="Selecione o tipo" />
@@ -94,7 +121,9 @@ export function SpentForm({ onSubmit, onCancel }: ExpenseFormProps) {
         <Button variant="outline" type="button" onClick={onCancel}>
           Cancelar
         </Button>
-        <Button type="submit">Criar Despesa</Button>
+        <Button type="submit">
+          {isEditSpent && isEditSpent.uuid_spent ? "Salvar" : "Criar Despesa"}
+        </Button>
       </DialogFooter>
     </form>
   );
