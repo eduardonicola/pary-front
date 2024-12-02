@@ -17,6 +17,15 @@ export interface Event {
   spent: Spent[];
 }
 
+export interface EventEdits {
+  name?: string;
+  locate?: string;
+  description?: string;
+  date_and_time?: string;
+  date_stop_sub?: string;
+  egalitarian?: boolean;
+}
+
 export interface Participant {
   uuid_user: string;
   name: string

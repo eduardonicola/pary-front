@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { AdditinalUser, Event, EventSpec, Spent } from "@/lib/types";
+import { AdditinalUser, Event, EventEdits, EventSpec, Spent } from "@/lib/types";
 import { storage } from "@/lib/storage";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,6 +27,7 @@ import { EventDetailsInfo } from "@/components/events/exib-info-event";
 import { toast } from "sonner";
 import { ConfirmAction } from "@/components/events/action-confirm";
 import axiosInstance from "@/hooks/axios/services";
+import { EditEventForm } from "@/components/events/form-edit-event";
 
 export default function EventDetailsPage() {
   const params = useParams();
@@ -145,6 +146,11 @@ export default function EventDetailsPage() {
     handleCloseActions()
   }
 
+  const updateEvent = async (eventEdited: EventEdits) =>{
+    await  activeEdit()
+    setEvent({...event, ...eventEdited})
+  }
+
   const deleteSpent = async () => {
     if(selectedSpent && selectedSpent.uuid_spent){
       try {
@@ -215,7 +221,7 @@ export default function EventDetailsPage() {
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {isEditEvent ? null : <EventDetailsInfo event={event} />}
+          {isEditEvent ? <EditEventForm onUpdate={updateEvent} onClose={activeEdit} event={event}/> : <EventDetailsInfo event={event} />}
 
           <div className="space-y-4">
             <Accordion type="single" collapsible>
@@ -264,7 +270,7 @@ export default function EventDetailsPage() {
                 <AccordionTrigger>
                   <div className="flex items-center">
                     <Wallet className="mr-2 h-4 w-4" />
-                    <span className="font-medium">Despesas</span>
+                    <span className="font-medium">Despesas ({event.spent.length})</span>
                     {isLevelEdit ? (
                       <Plus
                         onClick={(e) => handleCreateSpent(e)}
