@@ -13,6 +13,8 @@ import {
   Users,
   Wallet,
   Plus,
+  Pencil,
+  Trash,
 } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
@@ -72,16 +74,29 @@ export default function EventDetailsPage() {
     }
   }, 0);
 
-  const  igualitPerson  = totalSpent / event.participants.length
+  const igualitPerson = totalSpent / (event.participants.length + 1);
+
+  const lislistLevels = {
+    owner: "Dono",
+    maneger: "Gestor",
+    guest: "Partcipante",
+  };
+
+  const isOwner = event.userLevel == "owner";
+
+  const isLevelEdit = event.userLevel != "guest";
+
+  const showLevel = (strin: "owner" | "maneger" | "guest") =>
+    lislistLevels[strin];
 
   const handleCreateSpent = (e: React.MouseEvent<SVGSVGElement>) => {
-      e.stopPropagation
+    e.stopPropagation;
     setIsModalOpen(!isModalOpen);
   };
 
-  const addSpent = (newSpent: Spent) =>{
-    event.spent.push(newSpent)
-  }
+  const addSpent = (newSpent: Spent) => {
+    event.spent.push(newSpent);
+  };
 
   return (
     <div className="container mx-auto py-8">
@@ -92,7 +107,16 @@ export default function EventDetailsPage() {
 
       <Card className="mb-6">
         <CardHeader>
-          <CardTitle>{event.name}</CardTitle>
+          <CardTitle className="flex justify-between">
+            {event.name}
+
+            {isLevelEdit ? (
+              <div className="flex gap-2">
+                <Pencil className="h-5 w-5 text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer" />
+                <Trash className="h-5 w-5 text-muted-foreground hover:text-red-600 dark:hover:text-red-400 transition-colors cursor-pointer" />
+              </div>
+            ) : null}
+          </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid gap-4 md:grid-cols-2">
@@ -149,9 +173,15 @@ export default function EventDetailsPage() {
                       event.participants.map((participant) => (
                         <div
                           key={participant.uuid_user}
-                          className="text-sm text-muted-foreground"
+                          className="flex text-sm text-muted-foreground justify-between"
                         >
-                          {participant.name}
+                          <span>{participant.name} </span>
+                          <div className="flex items-center ">
+                            {isOwner && isLevelEdit ? (
+                              <Pencil className="h-4 mr-2 w-4 text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400" />
+                            ) : null}
+                            <span>{showLevel(participant.user_level)}</span>
+                          </div>
                         </div>
                       ))
                     ) : (
@@ -184,13 +214,25 @@ export default function EventDetailsPage() {
                   <Accordion type="single" collapsible>
                     {event.spent.map((spent, index) => (
                       <AccordionItem key={index} value={`index-${index}`}>
-                        <AccordionTrigger>{spent.name}</AccordionTrigger>
+                        <AccordionTrigger>
+                          <div className="flex w-full justify-between">
+                            <span>{spent.name}</span>
+                            {isLevelEdit ? (
+                              <div className="flex gap-2 items-center mr-2">
+                                <Pencil className="h-4 w-4 text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400 transition-colors cursor-pointer" />
+                                <Trash className="h-4 w-4 text-muted-foreground hover:text-red-600 dark:hover:text-red-400 transition-colors cursor-pointer" />
+                              </div>
+                            ) : null}
+                          </div>
+                        </AccordionTrigger>
                         <AccordionContent>
                           <div
                             key={spent.uuid_spent}
                             className="flex justify-between text-sm"
                           >
-                            <span>{spent.description} (x{spent.amount})</span>
+                            <span>
+                              {spent.description} (x{spent.amount})
+                            </span>
                             <span>R$ {Number(spent.value).toFixed(2)}</span>
                           </div>
                         </AccordionContent>
@@ -206,11 +248,16 @@ export default function EventDetailsPage() {
               <div className="flex justify-between font-medium">
                 <span>Total:</span>
                 <span>R$ {totalSpent.toFixed(2)}</span>
-              </div>  
-                <div className="flex justify-between text-sm text-muted-foreground mt-1">
-                  <span>Seu valor de consumo:</span>
-                  <span>R$ {event.egalitarian ? igualitPerson.toFixed(2) : spentPerson.toFixed(2)}</span>
-                </div>
+              </div>
+              <div className="flex justify-between text-sm text-muted-foreground mt-1">
+                <span>Seu valor de consumo:</span>
+                <span>
+                  R${" "}
+                  {event.egalitarian
+                    ? igualitPerson.toFixed(2)
+                    : spentPerson.toFixed(2)}
+                </span>
+              </div>
             </div>
           </div>
         </CardContent>

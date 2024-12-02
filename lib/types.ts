@@ -19,9 +19,9 @@ export interface Event {
 
 export interface Participant {
   uuid_user: string;
-  name: string  
+  name: string
+  user_level: 'owner' | 'maneger' | 'guest'
 }
-
 export interface Spent {
   uuid_spent: string;
   name: string;
