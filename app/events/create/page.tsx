@@ -24,9 +24,9 @@ export default function CreateEventPage() {
       }
       const dateAndTime = new Date(eventData.date_and_time);
       const dateStopSub = new Date(eventData.date_stop_sub);
-      
-      if(dateStopSub < dateAndTime){
-        toast.error('Prazo de inscrição deve ser maior que a data do evento');
+            
+      if(dateAndTime < dateStopSub){
+        toast.error('Prazo de inscrição deve ser menor que a data do evento');
         return
       }
       const newEvent: Omit<Event, 'userLevel' | 'participants' | 'spents' | 'uuid_event'> = {

@@ -27,7 +27,7 @@ export default function RegisterPage() {
       const newUser = {
         name,
         email,
-        phone,
+        phone: `+${phone}`,
         password,
       };
       

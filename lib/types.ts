@@ -14,7 +14,7 @@ export interface Event {
   egalitarian: boolean;
   userLevel: 'guest'| 'owner' | 'manager';
   participants: Participant[];
-  spents: Spent[];
+  spent: Spent[];
 }
 
 export interface Participant {
@@ -28,6 +28,18 @@ export interface Spent {
   description: string;
   amount: number;
   value: string;
-  type_spent: 'hard_drink' | 'drink' | 'food' | 'pastime';
+  type_spent: 'hard_drink' | 'drink' | 'food' | 'pastime' | 'location';
 }
 
+export interface EventSpec extends Event {
+  spentTotal: string
+}
+
+export interface AdditinalUser {
+  hard_drink: boolean,
+  drink: boolean,
+  food: boolean,
+  pastime: boolean,
+  uuid_user: string,
+  uuid_event: string
+}

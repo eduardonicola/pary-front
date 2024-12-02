@@ -1,5 +1,5 @@
 import axiosInstance from '@/hooks/axios/services';
-import { User, Event } from './types';
+import { User, Event, EventSpec, AdditinalUser } from './types';
 import Cookies from 'js-cookie';
 
 
@@ -42,5 +42,26 @@ export const storage = {
       console.error(error)
     }
     return []
+  },
+
+  getUniqueEvent: async (uuid_event: string | string[]) : Promise<EventSpec | null> =>{
+
+    try {
+      const resp = await axiosInstance.get(`${'event/'+uuid_event}`)
+      return resp.data
+    } catch (error) {
+      console.error(error);    
+      return null
+    }
+  },
+  getUserAdditional: async (uuid_event: string | string[]) : Promise<AdditinalUser | null> =>{
+    try {
+      const resp = await axiosInstance.get(`${'additional/'+uuid_event}`)
+      return resp.data
+    } catch (error) {
+      console.error(error);    
+      return null
+    }
   }
+
 };
