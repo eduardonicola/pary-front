@@ -10,7 +10,7 @@ export interface useEvent {
 export function EventDetailsInfo({ event }: useEvent) {
   return (
     <div>
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 space-y-2 md:grid-cols-2">
         <div className="space-y-2">
           <div className="flex items-center">
             <CalendarIcon className="mr-2 h-4 w-4" />
@@ -27,14 +27,20 @@ export function EventDetailsInfo({ event }: useEvent) {
 
         <div className="space-y-2">
           <div className="flex items-center">
-            <MapPinIcon className="mr-2 h-4 w-4" />
-            <span className="font-medium">Localização:</span>
+            <CalendarIcon className="mr-2 h-4 w-4" />
+            <span className="font-medium">Enceramento das incrições:</span>
           </div>
-          <p className="text-muted-foreground">{event.locate}</p>
+          <p className="text-muted-foreground">
+            {format(
+              new Date(event.date_stop_sub),
+              "d 'de' MMMM 'de' yyyy 'às' HH:mm",
+              { locale: ptBR }
+            )}
+          </p>
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-4 space-y-2 md:grid-cols-2">
         <div className="space-y-2">
           <h3 className="text-lg font-medium mb-2">Descrição</h3>
           <p className="text-muted-foreground">{event.description}</p>
@@ -44,6 +50,15 @@ export function EventDetailsInfo({ event }: useEvent) {
           <p className="text-muted-foreground">
             {event.egalitarian ? "Igalitaria" : "Por consumo"}
           </p>
+        </div>
+      </div>
+      <div className="grid gap-4 md:grid-cols-2 space-y-2">
+      <div className="space-y-2">
+          <div className="flex items-center">
+            <MapPinIcon className="mr-2 h-4 w-4" />
+            <span className="font-medium">Localização:</span>
+          </div>
+          <p className="text-muted-foreground">{event.locate}</p>
         </div>
       </div>
     </div>
