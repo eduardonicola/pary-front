@@ -80,15 +80,64 @@ export default function EventDetailsPage() {
     return acc + value * amount; // Multiplica e adiciona ao acumulador
   }, 0);
 
-  const spentPerson = event.spent.reduce((acc, curr) => {
-    if (curr.type_spent == "location" || additional?.[curr.type_spent]) {
-      const value = Number(curr.value); // Converte o valor para número
-      const amount = curr.amount; // Obtém a quantidade
-      return acc + value * amount; // Multiplica e adiciona ao acumulador
-    } else {
-      return acc;
+
+  const somehard_drink = event.spent.reduce((acc, curr) => {
+    if (curr.type_spent === "hard_drink") {
+      const value = Number(curr.value);
+      const amount = curr.amount;
+      return acc + (amount * value);
     }
-  }, 0);
+    return acc; 
+  }, 0); 
+  
+  const somedrink = event.spent.reduce((acc, curr) => {
+    if (curr.type_spent === "drink") {
+      const value = Number(curr.value);
+      const amount = curr.amount;
+      return acc + (amount * value);
+    }
+    return acc; 
+  }, 0); 
+
+  const somefood = event.spent.reduce((acc, curr) => {
+    if (curr.type_spent === "food") {
+      const value = Number(curr.value);
+      const amount = curr.amount;
+      return acc + (amount * value);
+    }
+    return acc; 
+  }, 0); 
+
+  const somelocation = event.spent.reduce((acc, curr) => {
+    if (curr.type_spent === "location") {
+      const value = Number(curr.value);
+      const amount = curr.amount;
+      return acc + (amount * value);
+    }
+    return acc; 
+  }, 0); 
+
+  const somepastime = event.spent.reduce((acc, curr) => {
+    if (curr.type_spent === "pastime") {
+      const value = Number(curr.value);
+      const amount = curr.amount;
+      return acc + (amount * value);
+    }
+    return acc; 
+  }, 0);  
+
+  const calcSpentPerson = () =>{
+    const valueLocation =  somelocation / (event.participants.length + 1 )
+    const valuePastime = additional?.pastime ? somepastime / (event.participants.filter(part => part.pastime).length + 1 ) : 0
+    const valueHardDrink = additional?.hard_drink ? somehard_drink / (event.participants.filter(part => part.hard_drink).length + 1 ) : 0
+    const valueFood = additional?.food ? somefood / (event.participants.filter(part => part.food).length + 1 ) : 0
+    const valueDrink = additional?.drink ? somedrink / (event.participants.filter(part => part.drink).length + 1 ) : 0
+    
+    const total = valueLocation + valuePastime + valueHardDrink + valueFood + valueDrink
+    return total.toFixed(2)
+  }
+
+  const spentPerson = calcSpentPerson()
 
   const igualitPerson = totalSpent / (event.participants.length + 1);
 
@@ -352,7 +401,7 @@ export default function EventDetailsPage() {
                   R${" "}
                   {event.egalitarian
                     ? igualitPerson.toFixed(2)
-                    : spentPerson.toFixed(2)}
+                    : spentPerson}
                 </span>
               </div>
             </div>
