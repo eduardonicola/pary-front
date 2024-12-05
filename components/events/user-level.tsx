@@ -27,7 +27,7 @@ export default function ModalEditLevel({
     setNewLevel(userSelected.user_level)
   },[userSelected])
 
-  const [level, setNewLevel] = useState< 'owner' |'manager' | 'guest'>('guest');
+  const [level , setNewLevel] = useState< 'owner' |'manager' | 'guest'>('guest');
 
   const handleSubmit = async () =>{
     const clone = {...userSelected}

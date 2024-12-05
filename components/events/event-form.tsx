@@ -116,7 +116,7 @@ export function EventForm({ onSubmit, isSubmitting }: EventFormProps) {
                 <SelectValue placeholder="Selecione o tipo de divisão" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="equal">Divisão Igual</SelectItem>
+                <SelectItem value="equal">Divisão igualitaria</SelectItem>
                 <SelectItem value="consumption">Baseado no Consumo</SelectItem>
               </SelectContent>
             </Select>

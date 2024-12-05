@@ -142,7 +142,7 @@ export function EditEventForm({ event, onClose, onUpdate }: EditEventFormProps) 
               <SelectValue placeholder="Selecione o tipo de divisão" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="equal">Divisão Igual</SelectItem>
+              <SelectItem value="equal">Divisão igualitaria</SelectItem>
               <SelectItem value="consumption">Baseado no Consumo</SelectItem>
             </SelectContent>
           </Select>
